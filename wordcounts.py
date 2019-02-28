@@ -3,18 +3,39 @@ import json
 from pathlib import Path
 import logging
 from notifier import Notifier
+import datetime
 
 #Load config file
 with open('wordcount_config.json', 'r') as f:
     config = json.load(f)
 
+#Load previous word counts
+with open('wordcount_history.txt', 'r') as f:
+    old_counts = f.read()
+old_lines = old_counts.splitlines()
+last_count = int(old_lines[-1].split()[1])
+
 class Count:
     def __init__(self, filename, count):
         self._filename = filename
         self._count = count
+        assert type(self._count) is int
 
     def __repr__(self):
         return f"{self.filename}: {self.count}"
+
+    def __add__(self, other):
+        # assert isinstance(other, Count)
+        return Count(None, other.count + self.count)
+
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+
+    def __int__(self):
+        return self._count
 
     @property
     def filename(self):
@@ -65,7 +86,6 @@ def extract_counts(folder: Folder):
     file_paths = [list(p.glob(filename)) for filename in folder.files]
     flattened_paths =  [y for x in file_paths 
                         for y in x]
-    import pdb; pdb.set_trace()
     file_strings = ''.join([f"{file_path.resolve()} " for file_path in flattened_paths])
     out = subprocess.Popen(f"wc -w {file_strings}",
                            stdout=subprocess.PIPE, 
@@ -77,9 +97,7 @@ def extract_counts(folder: Folder):
     else:
         splits = stdout.decode('utf-8').split()
         num_lines = int(len(splits)/2)
-        print(num_lines)
-        print(len(flattened_paths))
-        counts = [Count(filename=flattened_paths[i].name, count=splits[2*i]) 
+        counts = [Count(filename=flattened_paths[i].name, count=int(splits[2*i])) 
                   for i in range(num_lines-1)]
         folder.counts = counts
     return folder
@@ -87,6 +105,13 @@ def extract_counts(folder: Folder):
 #Extract Word counts 
 folders_with_counts = [extract_counts(folder) for folder in folders]
 
-#Send email
+total_word_count = 0
+for folder in  folders_with_counts:
+    total_word_count += int(sum(folder.counts))
+new_words = total_word_count-last_count
+
+with open('wordcount_history.txt', 'a') as f:
+    f.write(f'{datetime.date.today()}\t{total_word_count}\n')
+
 note = Notifier(config['email'])
-note.notification("Wordcounts", "")
+note.notification("Wordcounts", f"Today you wrote {new_words} words")
