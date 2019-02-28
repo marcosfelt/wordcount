@@ -1,10 +1,10 @@
 {
     "folders": [
         {
-            "name": "Thesis",
-            "path": "/Users/Kobi/Documents/Research/amineopt/documents/writing/thesis",
+            "name": "Write",
+            "path": "/Users/Joe/writing",
             "files": ["*md"]
         }
     ],
-    "email": "kobi.c.f@gmail.com"
+    "email": "joe@none.com"
 }
