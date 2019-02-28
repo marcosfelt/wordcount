@@ -116,5 +116,5 @@ new_words = total_word_count-last_count
 with open('wordcounts_history.txt', 'a') as f:
     f.write(f'{datetime.date.today()}\t{total_word_count}\n')
 
-# note = Notifier(config['email'])
-# note.notification("Wordcounts", f"Today you wrote {new_words} words")
+note = Notifier(config['email'])
+note.notification("Wordcounts", f"Today you wrote {new_words} words")
