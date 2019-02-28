@@ -115,3 +115,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/
+
+#wordcounts
+wordcounts_history.txt

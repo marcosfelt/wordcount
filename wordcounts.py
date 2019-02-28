@@ -10,10 +10,13 @@ with open('wordcount_config.json', 'r') as f:
     config = json.load(f)
 
 #Load previous word counts
-with open('wordcount_history.txt', 'r') as f:
-    old_counts = f.read()
-old_lines = old_counts.splitlines()
-last_count = int(old_lines[-1].split()[1])
+try:
+    with open('wordcounts_history.txt', 'r') as f:
+        old_counts = f.read()
+    old_lines = old_counts.splitlines()
+    last_count = int(old_lines[-1].split()[1])
+except FileNotFoundError:
+    last_count=0
 
 class Count:
     def __init__(self, filename, count):
@@ -110,8 +113,8 @@ for folder in  folders_with_counts:
     total_word_count += int(sum(folder.counts))
 new_words = total_word_count-last_count
 
-with open('wordcount_history.txt', 'a') as f:
+with open('wordcounts_history.txt', 'a') as f:
     f.write(f'{datetime.date.today()}\t{total_word_count}\n')
 
-note = Notifier(config['email'])
-note.notification("Wordcounts", f"Today you wrote {new_words} words")
+# note = Notifier(config['email'])
+# note.notification("Wordcounts", f"Today you wrote {new_words} words")
